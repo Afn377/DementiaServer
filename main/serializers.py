@@ -21,3 +21,14 @@ class PictureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Picture
         fields = ['id', 'description', 'image']  # Add other fields if needed
+
+
+from .models import Profile
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username')
+    email = serializers.EmailField(source='user.email')
+
+    class Meta:
+        model = Profile
+        fields = ['score1', 'score2', 'score3']

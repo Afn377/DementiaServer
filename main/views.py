@@ -1,9 +1,8 @@
 from django.shortcuts import render, redirect
-from .forms import RegisterForm, PostForm
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User, Group
-from .models import Post
+
 
 
 @login_required(login_url="/login")
@@ -122,7 +121,7 @@ class RandomPictureView(APIView):
         return Response(response_data)
     
 
-from django.http import JsonResponse
+    from django.http import JsonResponse
 from rest_framework.views import APIView
 from sentence_transformers import SentenceTransformer
 import numpy as np
@@ -151,3 +150,19 @@ class SentenceSimilarityView(APIView):
         # Calculate cosine similarity
         similarity = np.dot(embeddings[0], embeddings[1]) / (np.linalg.norm(embeddings[0]) * np.linalg.norm(embeddings[1]))
         return float(similarity) * 100  # Return percentage
+
+
+
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
+from .models import Profile
+from .serializers import UserProfileSerializer
+
+class UserProfileView(APIView):
+    def get(self, request, username):
+        user = get_object_or_404(User, username=username)
+        profile = get_object_or_404(Profile, user=user)
+        serializer = UserProfileSerializer(profile)
+        return Response(serializer.data)

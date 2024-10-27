@@ -19,6 +19,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from main.views import SignupView
 from main.views import RandomPictureView
 from main.views import SentenceSimilarityView
+from main.views import UserProfileView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,6 +30,7 @@ urlpatterns = [
     path('api/signup/', SignupView.as_view(), name='signup'), 
     path('api/random-pictures/', RandomPictureView.as_view(), name='random-pictures'),
     path('api/similarity/', SentenceSimilarityView.as_view(), name='sentence_similarity'),
+    path('api/user/<str:username>/', UserProfileView.as_view(), name='user-profile'),
 
 ]
 
