@@ -7,4 +7,11 @@ from main.models import Profile
 
 
 admin.site.register(Picture)
-admin.site.register(Profile)
+# admin.site.register(Profile)
+
+
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'score1', 'score2', 'score3')
+    search_fields = ('user__username',)

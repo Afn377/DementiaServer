@@ -20,7 +20,7 @@ from main.views import SignupView
 from main.views import RandomPictureView
 from main.views import SentenceSimilarityView
 from main.views import UserProfileView
-from main.views import UpdateUserScoreView
+from main.views import UpdateScoreView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,7 +32,7 @@ urlpatterns = [
     path('api/random-pictures/', RandomPictureView.as_view(), name='random-pictures'),
     path('api/similarity/', SentenceSimilarityView.as_view(), name='sentence_similarity'),
     path('api/user/<str:username>/', UserProfileView.as_view(), name='user-profile'),
-    path('api/update-score/', UpdateUserScoreView.as_view(), name='update_user_score'),
+    path('api/update-score/<str:username>/', UpdateScoreView.as_view(), name='update-score'),
 
 ]
 
