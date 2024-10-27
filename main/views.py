@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User, Group
+from django.views.decorators.csrf import csrf_exempt
 
 
 
@@ -121,7 +122,7 @@ class RandomPictureView(APIView):
         return Response(response_data)
     
 
-    from django.http import JsonResponse
+from django.http import JsonResponse
 from rest_framework.views import APIView
 from sentence_transformers import SentenceTransformer
 import numpy as np
@@ -166,3 +167,38 @@ class UserProfileView(APIView):
         profile = get_object_or_404(Profile, user=user)
         serializer = UserProfileSerializer(profile)
         return Response(serializer.data)
+    
+
+class UpdateUserScoreView(APIView):
+    
+    def post(self, request):
+        username = request.data.get('username')
+        score_type = request.data.get('score_type')  # Should be 'score1', 'score2', or 'score3'
+        score_value = request.data.get('score_value')
+        print(request.data)
+
+        try:
+            # Fetch the user
+            user = User.objects.get(username=username)
+            profile = Profile.objects.get(user=user)
+
+            # Update the appropriate score
+            if score_type == 'score1':
+                profile.score1.append(score_value)  # Assuming score1 is a list
+            elif score_type == 'score2':
+                profile.score2.append(score_value)  # Assuming score2 is a list
+            elif score_type == 'score3':
+                profile.score3.append(score_value)  # Assuming score3 is a list
+            else:
+                return Response({'error': 'Invalid score type.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            profile.save()  # Save the updated profile
+
+            return Response({'message': 'Score updated successfully.'}, status=status.HTTP_200_OK)
+
+        except User.DoesNotExist:
+            return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Profile.DoesNotExist:
+            return Response({'error': 'Profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

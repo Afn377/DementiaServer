@@ -10,16 +10,18 @@ class Picture(models.Model):
 
 from django.contrib.auth.models import User
 from django.db import models
+from django_mysql.models import ListCharField  # Import ListCharField
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    score1 = models.JSONField(default=list)
-    score2 = models.JSONField(default=list)
-    score3 = models.JSONField(default=list)
+    score1 = ListCharField(base_field=models.IntegerField(), size=10, max_length=200, default=list)  # Adjust size and max_length as needed
+    score2 = ListCharField(base_field=models.IntegerField(), size=10, max_length=200, default=list)
+    score3 = ListCharField(base_field=models.IntegerField(), size=10, max_length=200, default=list)
 
     def __str__(self):
         return self.user.username
-    
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -31,3 +33,4 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
+
