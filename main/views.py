@@ -97,7 +97,7 @@ class SignupView(generics.CreateAPIView):
 
 from rest_framework import viewsets
 from rest_framework.response import Response
-from .models import Picture
+from .models import Picture, Family
 from .serializers import PictureSerializer
 import random
 from rest_framework.decorators import action
@@ -106,6 +106,25 @@ class RandomPictureView(APIView):
     def get(self, request):
         # Get all pictures
         pictures = list(Picture.objects.all())
+        # Select 5 random pictures
+        random_pictures = random.sample(pictures, min(len(pictures), 5))
+
+        # Build the response with absolute URLs
+        response_data = []
+        for picture in random_pictures:
+            picture_data = {
+                "id": picture.id,
+                "description": picture.description,
+                "image_url": request.build_absolute_uri(picture.image.url)  # Get the absolute URL
+            }
+            response_data.append(picture_data)
+
+        return Response(response_data)
+    
+class FamilyView(APIView):
+    def get(self, request):
+        # Get all pictures
+        pictures = list(Family.objects.all())
         # Select 5 random pictures
         random_pictures = random.sample(pictures, min(len(pictures), 5))
 
@@ -246,3 +265,19 @@ class UpdateScoreView(APIView):
         except Exception as e:
             print(f"Exception occurred: {str(e)}")  # Print the exception message for debugging
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# class UpdateRemindersView(APIView):
+#     def post(self, request, username):
+#         try:
+#             profile = Profile.objects.get(user__username=username)
+#             print(request.data)
+#             reminders = request.data.get('reminders', [])
+            
+#             # Set reminders using the setter method
+#             profile.set_reminders_list(reminders)
+#             profile.save()
+            
+#             return Response({'message': 'Reminders updated successfully!'}, status=status.HTTP_200_OK)
+#         except Profile.DoesNotExist:
+#             return Response({'error': 'Profile not found.'}, status=status.HTTP_404_NOT_FOUND)

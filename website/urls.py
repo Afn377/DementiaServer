@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from main.views import SignupView
-from main.views import RandomPictureView
+from main.views import RandomPictureView, FamilyView
 from main.views import SentenceSimilarityView
 from main.views import UserProfileView
 from main.views import UpdateScoreView
@@ -30,9 +30,11 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/signup/', SignupView.as_view(), name='signup'), 
     path('api/random-pictures/', RandomPictureView.as_view(), name='random-pictures'),
+    path('api/family/', FamilyView.as_view(), name='random-pictures'),
     path('api/similarity/', SentenceSimilarityView.as_view(), name='sentence_similarity'),
     path('api/user/<str:username>/', UserProfileView.as_view(), name='user-profile'),
     path('api/update-score/<str:username>/', UpdateScoreView.as_view(), name='update-score'),
+    # path('api/profile/<str:username>/update-reminders/', UpdateRemindersView.as_view(), name='update-reminders'),
 
 ]
 
