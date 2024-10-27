@@ -31,4 +31,4 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ['score1', 'score2', 'score3']
+        fields = ['username', 'email', 'score1', 'score2', 'score3']
