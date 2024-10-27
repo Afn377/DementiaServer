@@ -11,3 +11,13 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title + "\n" + self.description
+
+
+from django.db import models
+
+class Picture(models.Model):
+    description = models.TextField()  # Field for the picture's description
+    image = models.ImageField(upload_to='pictures/')  # Field for the image
+
+    def __str__(self):
+        return self.description  # This will show the description in the admin interface

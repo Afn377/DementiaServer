@@ -63,3 +63,91 @@ def sign_up(request):
         form = RegisterForm()
 
     return render(request, 'registration/sign_up.html', {"form": form})
+
+
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+class SecureDataView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({"data": "This is secure data."})
+
+
+from rest_framework import generics
+from django.contrib.auth.models import User
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import UserSerializer  # Create a serializer for the User model
+
+class SignupView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({'username': user.username}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+from rest_framework import viewsets
+from rest_framework.response import Response
+from .models import Picture
+from .serializers import PictureSerializer
+import random
+from rest_framework.decorators import action
+
+class RandomPictureView(APIView):
+    def get(self, request):
+        # Get all pictures
+        pictures = list(Picture.objects.all())
+        # Select 5 random pictures
+        random_pictures = random.sample(pictures, min(len(pictures), 5))
+
+        # Build the response with absolute URLs
+        response_data = []
+        for picture in random_pictures:
+            picture_data = {
+                "id": picture.id,
+                "description": picture.description,
+                "image_url": request.build_absolute_uri(picture.image.url)  # Get the absolute URL
+            }
+            response_data.append(picture_data)
+
+        return Response(response_data)
+    
+
+from django.http import JsonResponse
+from rest_framework.views import APIView
+from sentence_transformers import SentenceTransformer
+import numpy as np
+
+class SentenceSimilarityView(APIView):
+    def post(self, request):
+        # Get sentences from the request data
+        s1 = request.data.get("sentence1")
+        s2 = request.data.get("sentence2")
+
+        # Check if both sentences are provided
+        if not s1 or not s2:
+            return JsonResponse({'error': 'Both sentence1 and sentence2 are required.'}, status=400)
+
+        # Calculate similarity
+        similarity_score = self.get_similarity(s1, s2)
+        
+        # Return the result as JSON
+        return JsonResponse({'result': similarity_score})
+
+    def get_similarity(self, s1, s2):
+        sentences = [s1, s2]
+        model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+        embeddings = model.encode(sentences)
+
+        # Calculate cosine similarity
+        similarity = np.dot(embeddings[0], embeddings[1]) / (np.linalg.norm(embeddings[0]) * np.linalg.norm(embeddings[1]))
+        return float(similarity) * 100  # Return percentage

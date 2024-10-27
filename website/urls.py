@@ -15,9 +15,25 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from main.views import SignupView
+from main.views import RandomPictureView
+from main.views import SentenceSimilarityView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('main.urls')),
     path('', include('django.contrib.auth.urls')),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/signup/', SignupView.as_view(), name='signup'), 
+    path('api/random-pictures/', RandomPictureView.as_view(), name='random-pictures'),
+    path('api/similarity/', SentenceSimilarityView.as_view(), name='sentence_similarity'),
+
 ]
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+if settings.DEBUG:  # Only serve media files in debug mode
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
