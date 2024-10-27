@@ -169,36 +169,80 @@ class UserProfileView(APIView):
         return Response(serializer.data)
     
 
-class UpdateUserScoreView(APIView):
-    
-    def post(self, request):
-        username = request.data.get('username')
-        score_type = request.data.get('score_type')  # Should be 'score1', 'score2', or 'score3'
-        score_value = request.data.get('score_value')
-        print(request.data)
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.contrib.auth.models import User
+from .models import Profile
+from .serializers import UserProfileSerializer  # Make sure to create a serializer for Profile if you haven't already
 
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth.models import User
+from .models import Profile
+import json
+
+class UpdateScoreView(APIView):
+    def get(self, request, username):
         try:
-            # Fetch the user
+            user = User.objects.get(username=username)
+            profile = Profile.objects.get(user=user)
+            scores = {
+                'score1': profile.get_score1_list(),
+                'score2': profile.get_score2_list(),
+                'score3': profile.get_score3_list(),
+            }
+            return Response(scores, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Profile.DoesNotExist:
+            return Response({"error": "Profile not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    def post(self, request, username):
+        try:
             user = User.objects.get(username=username)
             profile = Profile.objects.get(user=user)
 
-            # Update the appropriate score
-            if score_type == 'score1':
-                profile.score1.append(score_value)  # Assuming score1 is a list
-            elif score_type == 'score2':
-                profile.score2.append(score_value)  # Assuming score2 is a list
-            elif score_type == 'score3':
-                profile.score3.append(score_value)  # Assuming score3 is a list
-            else:
-                return Response({'error': 'Invalid score type.'}, status=status.HTTP_400_BAD_REQUEST)
+            # Extracting score_type and score_value from the request
+            score_type = request.data.get('score_type')
+            score_value = request.data.get('score_value')
 
-            profile.save()  # Save the updated profile
+            # Debugging information
+            print(f"Received score_type: {score_type}, score_value: {score_value}")
 
-            return Response({'message': 'Score updated successfully.'}, status=status.HTTP_200_OK)
+            if score_value is not None:
+                try:
+                    score_value = int(score_value)  # Ensure score_value is an integer
+                except ValueError:
+                    return Response({"error": "Score value must be an integer."}, status=status.HTTP_400_BAD_REQUEST)
+
+                # Update the corresponding score list based on score_type
+                if score_type == 'score1':
+                    current_scores = profile.get_score1_list()
+                    current_scores.append(score_value)
+                    profile.set_score1_list(current_scores)
+                elif score_type == 'score2':
+                    current_scores = profile.get_score2_list()
+                    current_scores.append(score_value)
+                    profile.set_score2_list(current_scores)
+                elif score_type == 'score3':
+                    current_scores = profile.get_score3_list()
+                    current_scores.append(score_value)
+                    profile.set_score3_list(current_scores)
+                else:
+                    return Response({"error": "Invalid score type."}, status=status.HTTP_400_BAD_REQUEST)
+
+                # Save the profile
+                profile.save()
+
+                return Response({"message": "Score updated successfully."}, status=status.HTTP_200_OK)
 
         except User.DoesNotExist:
-            return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
         except Profile.DoesNotExist:
-            return Response({'error': 'Profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Profile not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            print(f"Exception occurred: {str(e)}")  # Print the exception message for debugging
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

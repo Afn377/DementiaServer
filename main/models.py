@@ -13,24 +13,44 @@ from django.db import models
 from django_mysql.models import ListCharField  # Import ListCharField
 
 
+from django.db import models
+from django_mysql.models import ListCharField
+from django.contrib.auth.models import User
+
+from django.db import models
+from django_mysql.models import ListCharField
+
+from django.db import models
+from django.contrib.auth.models import User
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    score1 = ListCharField(base_field=models.IntegerField(), size=10, max_length=200, default=list)  # Adjust size and max_length as needed
-    score2 = ListCharField(base_field=models.IntegerField(), size=10, max_length=200, default=list)
-    score3 = ListCharField(base_field=models.IntegerField(), size=10, max_length=200, default=list)
+    score1 = models.CharField(max_length=255, default='')
+    score2 = models.CharField(max_length=255, default='')
+    score3 = models.CharField(max_length=255, default='')
 
     def __str__(self):
         return self.user.username
 
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+    def get_score1_list(self):
+        return list(map(int, self.score1.split(','))) if self.score1 else []
 
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
+    def get_score2_list(self):
+        return list(map(int, self.score2.split(','))) if self.score2 else []
 
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+    def get_score3_list(self):
+        return list(map(int, self.score3.split(','))) if self.score3 else []
+
+    def set_score1_list(self, scores):
+        self.score1 = ','.join(map(str, scores))
+        print(','.join(map(str, scores)))
+
+    def set_score2_list(self, scores):
+        self.score2 = ','.join(map(str, scores))
+
+    def set_score3_list(self, scores):
+        self.score3 = ','.join(map(str, scores))
+
+
+
 
