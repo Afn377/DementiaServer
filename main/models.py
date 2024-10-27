@@ -7,6 +7,13 @@ class Picture(models.Model):
     def __str__(self):
         return self.description  # This will show the description in the admin interface
     
+class Family(models.Model):
+    description = models.TextField()  # Field for the picture's description
+    image = models.ImageField(upload_to='pictures/')  # Field for the image
+
+    def __str__(self):
+        return self.description  # This will show the description in the admin interface
+    
 
 from django.contrib.auth.models import User
 from django.db import models
@@ -43,14 +50,9 @@ class Profile(models.Model):
 
     def set_score1_list(self, scores):
         self.score1 = ','.join(map(str, scores))
-        print(','.join(map(str, scores)))
 
     def set_score2_list(self, scores):
         self.score2 = ','.join(map(str, scores))
 
     def set_score3_list(self, scores):
         self.score3 = ','.join(map(str, scores))
-
-
-
-

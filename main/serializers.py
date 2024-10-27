@@ -32,3 +32,5 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['username', 'email', 'score1', 'score2', 'score3']
+
+
